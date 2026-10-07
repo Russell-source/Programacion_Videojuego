@@ -4,7 +4,7 @@ public class ProjectVideojuego : MonoBehaviour
 {
     public float velocidad = 5f;
     public float fuerzaSalto = 7f;
-    public float alturaLimite = -10f; 
+    public float alturaLimite = -10f; // si cae por debajo de esta altura, reaparece
 
     private Rigidbody2D rb;
     private bool enSuelo;
@@ -13,23 +13,23 @@ public class ProjectVideojuego : MonoBehaviour
     void Start()
     {
         rb = GetComponent<Rigidbody2D>();
-        puntoInicio = transform.position; 
+        puntoInicio = transform.position; // guarda donde empezó
     }
 
     void Update()
     {
-        
+        // Movimiento en el eje X (flechas o A/D)
         float movimiento = Input.GetAxisRaw("Horizontal");
         rb.linearVelocity = new Vector2(movimiento * velocidad, rb.linearVelocity.y);
 
-        
+        // Salto con la barra espaciadora
         if (Input.GetKeyDown(KeyCode.Space) && enSuelo)
         {
             rb.linearVelocity = new Vector2(rb.linearVelocity.x, fuerzaSalto);
             enSuelo = false;
         }
 
-        
+        // Si cae al vacío, vuelve al inicio
         if (transform.position.y < alturaLimite)
         {
             Reaparecer();
@@ -39,15 +39,25 @@ public class ProjectVideojuego : MonoBehaviour
     void Reaparecer()
     {
         transform.position = puntoInicio;
-        rb.linearVelocity = Vector2.zero; 
+        rb.linearVelocity = Vector2.zero; // detiene la caída
     }
 
-    void OnCollisionEnter2D(Collision2D colision)
+    // Mientras toque algo por debajo, está en el suelo
+    void OnCollisionStay2D(Collision2D colision)
     {
-        if (colision.gameObject.CompareTag("Suelo"))
+        foreach (ContactPoint2D contacto in colision.contacts)
         {
-            enSuelo = true;
-            Debug.Log("Tocando el suelo"); 
+            if (contacto.normal.y > 0.5f)
+            {
+                enSuelo = true;
+                return;
+            }
         }
+    }
+
+    // Al dejar de tocar, ya no está en el suelo
+    void OnCollisionExit2D(Collision2D colision)
+    {
+        enSuelo = false;
     }
 }
