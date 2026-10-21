@@ -7,12 +7,16 @@ public class ProjectVideojuego : MonoBehaviour
     public float alturaLimite = -10f; // si cae por debajo de esta altura, reaparece
 
     private Rigidbody2D rb;
+    private Animator animator;
+    private SpriteRenderer sr;
     private bool enSuelo;
     private Vector3 puntoInicio;
 
     void Start()
     {
         rb = GetComponent<Rigidbody2D>();
+        animator = GetComponent<Animator>();
+        sr = GetComponent<SpriteRenderer>();
         puntoInicio = transform.position; // guarda donde empezó
     }
 
@@ -21,6 +25,10 @@ public class ProjectVideojuego : MonoBehaviour
         // Movimiento en el eje X (flechas o A/D)
         float movimiento = Input.GetAxisRaw("Horizontal");
         rb.linearVelocity = new Vector2(movimiento * velocidad, rb.linearVelocity.y);
+
+        // Voltear el sprite según la dirección
+        if (movimiento > 0) sr.flipX = false;
+        else if (movimiento < 0) sr.flipX = true;
 
         // Salto con la barra espaciadora
         if (Input.GetKeyDown(KeyCode.Space) && enSuelo)
@@ -34,6 +42,10 @@ public class ProjectVideojuego : MonoBehaviour
         {
             Reaparecer();
         }
+
+        // Actualizar los parámetros del Animator
+        animator.SetBool("Caminando", movimiento != 0);
+        animator.SetBool("EnSuelo", enSuelo);
     }
 
     void Reaparecer()
