@@ -1,4 +1,5 @@
 using UnityEngine;
+using TMPro;
 
 public class ProjectVideojuego : MonoBehaviour
 {
@@ -6,11 +7,15 @@ public class ProjectVideojuego : MonoBehaviour
     public float fuerzaSalto = 7f;
     public float alturaLimite = -10f; // si cae por debajo de esta altura, reaparece
 
+    public TextMeshProUGUI contadorJuego; // aquí se arrastra el texto ContadorJuego
+
     private Rigidbody2D rb;
     private Animator animator;
     private SpriteRenderer sr;
     private bool enSuelo;
     private Vector3 puntoInicio;
+
+    private int cake, chicken, coffe, jam, cookie;
 
     void Start()
     {
@@ -18,6 +23,7 @@ public class ProjectVideojuego : MonoBehaviour
         animator = GetComponent<Animator>();
         sr = GetComponent<SpriteRenderer>();
         puntoInicio = transform.position; // guarda donde empezó
+        ActualizarContador();
     }
 
     void Update()
@@ -52,6 +58,33 @@ public class ProjectVideojuego : MonoBehaviour
     {
         transform.position = puntoInicio;
         rb.linearVelocity = Vector2.zero; // detiene la caída
+    }
+
+    // Detecta cuando el jugador toca un objeto coleccionable
+    void OnTriggerEnter2D(Collider2D otro)
+    {
+        if (!otro.CompareTag("Collectible")) return;
+
+        switch (otro.gameObject.name)
+        {
+            case "Cake": cake++; break;
+            case "Chicken": chicken++; break;
+            case "Coffe": coffe++; break;
+            case "Jam": jam++; break;
+            case "Cookie": cookie++; break;
+        }
+
+        Destroy(otro.gameObject); // el objeto desaparece
+        ActualizarContador();
+    }
+
+    void ActualizarContador()
+    {
+        if (contadorJuego == null) return;
+
+        contadorJuego.text = "Cake: " + cake + " | Chicken: " + chicken +
+                             " | Coffe: " + coffe + " | Jam: " + jam +
+                             " | Cookie: " + cookie;
     }
 
     // Mientras toque algo por debajo, está en el suelo
